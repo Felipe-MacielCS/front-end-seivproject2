@@ -2,27 +2,30 @@ import apiClient from "./services.js";
 
 export default {
   getAll() {
-    return apiClient.get("/tutorials");
+    return apiClient.get("/api/courses");
   },
-  getAllForUser(userId) {
-    return apiClient.get("/tutorials/userTut/" + userId);
-  },
-  get(id) {
-    return apiClient.get(`/tutorials/${id}`);
+  get(courseNumber) {
+    return apiClient.get(`/api/courses/${courseNumber}`);
   },
   create(data) {
-    return apiClient.post("/tutorials", data);
+    return apiClient.post("/api/courses", data);
   },
-  update(id, data) {
-    return apiClient.put(`/tutorials/${id}`, data);
+  update(courseNumber, data) {
+    return apiClient.put(`/api/courses/${courseNumber}`, data);
   },
-  delete(id) {
-    return apiClient.delete(`/tutorials/${id}`);
+  delete(courseNumber) {
+    return apiClient.delete(`/api/courses/${courseNumber}`);
   },
   deleteAll() {
-    return apiClient.delete(`/tutorials`);
+    return apiClient.delete(`/api/courses`);
   },
-  findByTitle(title) {
-    return apiClient.get(`/tutorials?title=${title}`);
+  findByDepartment(dept) {
+    return apiClient.get(`/api/courses/department/${dept}`);
   },
+  findByLevel(level) {
+    return apiClient.get(`/api/courses/level/${level}`);
+  },
+  findByCreditHours(hours) {
+    return apiClient.get(`/api/courses/hours/${hours}`);
+  }
 };
