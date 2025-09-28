@@ -1,14 +1,12 @@
+<script setup>
+
+
+</script>
+
 <template>
   <v-app>
     <v-main>
-      <HeaderBar />
-      
+      <router-view />
     </v-main>
-
-  
   </v-app>
 </template>
-
-<script setup>
-  //
-</script>
