@@ -2,7 +2,7 @@ import axios from "axios";
 
 var baseurl = "";
 if (import.meta.env.DEV) {
-  baseurl = "http://localhost/course-backend";
+  baseurl = "http://localhost/";
 } else {
   baseurl = "/2025/project2/t7"
 }
