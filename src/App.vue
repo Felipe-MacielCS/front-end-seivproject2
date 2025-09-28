@@ -1,10 +1,11 @@
 <template>
   <v-app>
     <v-main>
-      <HelloWorld />
+      <HeaderBar />
+      
     </v-main>
 
-    <AppFooter />
+  
   </v-app>
 </template>
 
