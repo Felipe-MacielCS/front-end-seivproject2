@@ -4,7 +4,7 @@ var baseurl = "";
 if (import.meta.env.DEV) {
   baseurl = "http://localhost:8080";
 } else {
-  baseurl = "/seiv2025/p2/t7/"
+  baseurl = "/nodeapps/2025/project2/t7"
 }
 
 const apiClient = axios.create({
