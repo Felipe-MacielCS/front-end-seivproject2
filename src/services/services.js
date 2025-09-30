@@ -2,9 +2,9 @@ import axios from "axios";
 
 var baseurl = "";
 if (import.meta.env.DEV) {
-  baseurl = "http://localhost:8080";
+  baseurl = "http://localhost:8080/";
 } else {
-  baseurl = "course-t7"
+  baseurl = "/course-t7"
 }
 
 const apiClient = axios.create({
