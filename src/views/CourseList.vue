@@ -3,16 +3,22 @@ import CourseServices from "../services/courseService";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import avocadoImg from "../assets/avocado.png"; 
+import CourseDialog from "../components/courseDetails.vue"
+import CourseDetails from "../components/courseDetails.vue";
 
 const router = useRouter();
 const courses = ref([]);
+const dialog = ref(false)
+const selectedCourse = ref(null)
+
 
 const editCourse = (course) => {
   router.push({ name: "editCourse", params: { id: course.course_number } });
 };
 
 const viewCourse = (course) => {
-  router.push({ name: "viewCourse", params: { id: course.course_number } });
+  selectedCourse.value = course
+  dialog.value = true
 };
 
 const deleteCourse = (course) => {
@@ -90,6 +96,8 @@ onMounted(() => {
           </tbody>
         </v-table>
       </v-card>
+
+      <CourseDetails v-model="dialog" :course="selectedCourse" />
     </v-container>
   </div>
 </template>
