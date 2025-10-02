@@ -3,8 +3,13 @@ import CourseServices from "../services/courseService";
 import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import avocadoImg from "../assets/avocado.png";
+import CourseDetails from "../components/courseDetails.vue";
 
 const router = useRouter();
+
+// Modal state
+const dialog = ref(false);
+const selectedCourse = ref(null);
 
 // state
 const itemsPerPage = ref(10);
@@ -33,7 +38,8 @@ const editCourse = (course) => {
 };
 
 const viewCourse = (course) => {
-  router.push({ name: "viewCourse", params: { id: course.course_number } });
+  selectedCourse.value = course;
+  dialog.value = true;
 };
 
 const deleteCourse = (course) => {
@@ -49,7 +55,7 @@ const loadItems = ({ page, itemsPerPage, sortBy }) => {
     .then((response) => {
       let items = response.data;
 
-      // filter locally (you can push this logic to backend later)
+      // filter locally
       if (courseNumber.value) {
         items = items.filter((c) =>
           c.course_number.toLowerCase().includes(courseNumber.value.toLowerCase())
@@ -168,5 +174,8 @@ watch([courseNumber, department, level], () => {
         </template>
       </v-data-table-server>
     </v-card>
+
+    <!-- Course Details Modal -->
+    <CourseDetails v-model="dialog" :course="selectedCourse" />
   </v-container>
 </template>
