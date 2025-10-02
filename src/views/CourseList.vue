@@ -26,10 +26,9 @@ const serverItems = ref([]);
 const loading = ref(true);
 const totalItems = ref(0);
 
-// search fields
-const courseNumber = ref("");
+// search fields - only course name and department
+const courseName = ref("");
 const department = ref("");
-const level = ref("");
 const search = ref("");
 
 // actions
@@ -55,20 +54,17 @@ const loadItems = ({ page, itemsPerPage, sortBy }) => {
     .then((response) => {
       let items = response.data;
 
-      // filter locally
-      if (courseNumber.value) {
+      // filter by course name
+      if (courseName.value) {
         items = items.filter((c) =>
-          c.course_number.toLowerCase().includes(courseNumber.value.toLowerCase())
+          c.course_name.toLowerCase().includes(courseName.value.toLowerCase())
         );
       }
+      
+      // filter by department
       if (department.value) {
         items = items.filter((c) =>
           c.dept.toLowerCase().includes(department.value.toLowerCase())
-        );
-      }
-      if (level.value) {
-        items = items.filter((c) =>
-          c.level.toLowerCase().includes(level.value.toLowerCase())
         );
       }
 
@@ -101,7 +97,7 @@ onMounted(() => {
 });
 
 // refresh table when search inputs change
-watch([courseNumber, department, level], () => {
+watch([courseName, department], () => {
   search.value = String(Date.now());
 });
 </script>
@@ -131,13 +127,13 @@ watch([courseNumber, department, level], () => {
         @update:options="loadItems"
       >
         <!-- table footer with search inputs -->
-        <template v-slot:tfoot>
+        <template v-slot:thead>
           <tr>
-            <td>
+            <td colspan="2">
               <v-text-field
-                v-model="courseNumber"
+                v-model="courseName"
                 density="compact"
-                placeholder="Search course #..."
+                placeholder="Search course name..."
                 hide-details
               />
             </td>
@@ -149,14 +145,7 @@ watch([courseNumber, department, level], () => {
                 hide-details
               />
             </td>
-            <td>
-              <v-text-field
-                v-model="level"
-                density="compact"
-                placeholder="Search level..."
-                hide-details
-              />
-            </td>
+            <td colspan="3"></td>
           </tr>
         </template>
 
