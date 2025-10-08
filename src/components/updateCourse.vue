@@ -33,23 +33,32 @@ watch(
   { immediate: true }
 )
 
+const rules = {
+  required: (v) => !!v || 'This field is required',
+  number: (v) => !isNaN(Number(v)) || 'Must be a number',
+  positive: (v) => Number(v) > 0 || 'Must be greater than 0',
+  length: (min) => (v) =>
+    (v && v.length >= min) || `Must be at least ${min} characters`
+}
+
 
 function saveChanges() {
   
-  if (
-    !editedCourse.value.course_name ||
-    !editedCourse.value.course_number ||
-    !editedCourse.value.dept ||
-    !editedCourse.value.level ||
-    !editedCourse.value.hours
-  ) {
-    alert('Please fill out all required fields.')
-    return
-  }
-
-  emit('save', { ...editedCourse.value })
+ if (!isValid.value) return
+  emit('save', editedCourse.value)
   dialogVisible.value = false
 }
+
+const isValid = computed(() => {
+  return (
+    editedCourse.value.course_name &&
+    editedCourse.value.course_number &&
+    editedCourse.value.dept &&
+    editedCourse.value.level &&
+    editedCourse.value.hours &&
+    editedCourse.value.course_description
+  )
+})
 </script>
 
 <template>
@@ -62,37 +71,43 @@ function saveChanges() {
           <v-text-field
             v-model="editedCourse.course_name"
             label="Course Name"
+            :rules="[rules.required, rules.length(3)]"
             required
           ></v-text-field>
 
           <v-text-field
             v-model="editedCourse.course_number"
             label="Course Number"
+            :rules="[rules.required, rules.number]"
             required
           ></v-text-field>
 
           <v-text-field
             v-model="editedCourse.dept"
             label="Department"
+            :rules="[rules.required, rules.length(2)]"
             required
           ></v-text-field>
 
           <v-text-field
             v-model="editedCourse.level"
             label="Level"
+            :rules="[rules.required, rules.number, rules.positive]"
             required
           ></v-text-field>
 
           <v-text-field
             v-model="editedCourse.hours"
             label="Credit Hours"
-            type="number"
+            :rules="[rules.required, rules.number, rules.positive]"
             required
           ></v-text-field>
 
           <v-textarea
             v-model="editedCourse.course_description"
             label="Description"
+            :rules="[rules.required]"
+            required
           ></v-textarea>
         </v-form>
       </v-card-text>
@@ -100,7 +115,7 @@ function saveChanges() {
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click="dialogVisible = false">Cancel</v-btn>
-        <v-btn color="primary" @click="saveChanges">Save</v-btn>
+        <v-btn color="primary" :disabled="!isValid" @click="saveCourse">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
