@@ -67,9 +67,10 @@ const isValid = computed(() => {
     editedCourse.value.course_name &&
     editedCourse.value.course_number &&
     editedCourse.value.dept &&
-    editedCourse.value.level &&
-    editedCourse.value.hours &&
-    editedCourse.value.course_description
+    editedCourse.value.level !== null &&
+    editedCourse.value.level !== '' &&
+    editedCourse.value.hours !== null &&
+    editedCourse.value.hours !== ''
   )
 })
 </script>
