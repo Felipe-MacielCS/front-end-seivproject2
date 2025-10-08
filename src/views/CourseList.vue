@@ -4,12 +4,15 @@ import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import avocadoImg from "../assets/avocado.png";
 import CourseDetails from "../components/courseDetails.vue";
+import UpdateCourse from "../components/updateCourse.vue";
 
 const router = useRouter();
 
 // Modal state
 const dialog = ref(false);
+const editDialog = ref(false);
 const selectedCourse = ref(null);
+const editedCourse = ref(null);
 
 // state
 const itemsPerPage = ref(10);
@@ -34,7 +37,8 @@ const search = ref("");
 
 // actions
 const editCourse = (course) => {
-  router.push({ name: "editCourse", params: { id: course.course_number } });
+  editedCourse.value = course;
+  editDialog.value = true;
 };
 
 const viewCourse = (course) => {
@@ -177,5 +181,6 @@ watch([courseNumber, department, level], () => {
 
     <!-- Course Details Modal -->
     <CourseDetails v-model="dialog" :course="selectedCourse" />
+    <UpdateCourse v-model="editDialog" :course="editedCourse" />
   </v-container>
 </template>
