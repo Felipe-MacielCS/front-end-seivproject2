@@ -4,6 +4,7 @@ import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import avocadoImg from "../assets/avocado.png";
 import CourseDetails from "../components/courseDetails.vue";
+import DeleteDialog from "../components/courseDelete.vue"; // Import the delete dialog
 import UpdateCourse from "../components/updateCourse.vue";
 
 const router = useRouter();
@@ -13,6 +14,10 @@ const dialog = ref(false);
 const editDialog = ref(false);
 const selectedCourse = ref(null);
 const editedCourse = ref(null);
+
+// Delete dialog state
+const deleteDialog = ref(false);
+const courseToDelete = ref(null);
 
 // state
 const itemsPerPage = ref(10);
@@ -29,7 +34,7 @@ const serverItems = ref([]);
 const loading = ref(true);
 const totalItems = ref(0);
 
-// search fields - only course name and department
+// search fields
 const courseName = ref("");
 const department = ref("");
 const search = ref("");
@@ -45,10 +50,32 @@ const viewCourse = (course) => {
   dialog.value = true;
 };
 
-const deleteCourse = (course) => {
-  CourseServices.delete(course.course_number).then(() => {
-    loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
-  });
+const deleteCourse = (item) => {
+  const course = item.raw || item;
+  courseToDelete.value = course;
+  deleteDialog.value = true;
+};
+
+const confirmDelete = () => {
+  if (!courseToDelete.value) return;
+
+  CourseServices.delete(courseToDelete.value.course_number)
+    .then(() => {
+      deleteDialog.value = false;
+      courseToDelete.value = null;
+      loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
+    })
+    .catch((error) => {
+      console.error("Error deleting course:", error);
+      console.error("Error response:", error.response?.data);
+
+      const errorMessage = error.response?.data?.message
+        || error.response?.data?.error
+        || error.message
+        || "Failed to delete course. Please try again.";
+
+      alert(errorMessage);
+    });
 };
 
 // Add save handler for updating courses
@@ -76,7 +103,7 @@ const loadItems = ({ page, itemsPerPage, sortBy }) => {
           c.course_name.toLowerCase().includes(courseName.value.toLowerCase())
         );
       }
-      
+
       // filter by department
       if (department.value) {
         items = items.filter((c) =>
@@ -182,6 +209,13 @@ watch([courseName, department], () => {
 
     <!-- Course Details Modal -->
     <CourseDetails v-model="dialog" :course="selectedCourse" />
+
+    <!-- Delete Confirmation Dialog -->
+    <DeleteDialog
+      v-model="deleteDialog"
+      :course="courseToDelete"
+      @confirm="confirmDelete"
+    />
     <UpdateCourse v-model="editDialog" :course="editedCourse" @save="saveCourse" />
   </v-container>
 </template>
