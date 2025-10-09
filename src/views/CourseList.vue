@@ -5,12 +5,15 @@ import { useRouter } from "vue-router";
 import avocadoImg from "../assets/avocado.png";
 import CourseDetails from "../components/courseDetails.vue";
 import DeleteDialog from "../components/courseDelete.vue"; // Import the delete dialog
+import UpdateCourse from "../components/updateCourse.vue";
 
 const router = useRouter();
 
 // Modal state
 const dialog = ref(false);
+const editDialog = ref(false);
 const selectedCourse = ref(null);
+const editedCourse = ref(null);
 
 // Delete dialog state
 const deleteDialog = ref(false);
@@ -38,7 +41,8 @@ const search = ref("");
 
 // actions
 const editCourse = (course) => {
-  router.push({ name: "editCourse", params: { id: course.course_number } });
+  editedCourse.value = course;
+  editDialog.value = true;
 };
 
 const viewCourse = (course) => {
@@ -71,6 +75,18 @@ const confirmDelete = () => {
         || "Failed to delete course. Please try again.";
 
       alert(errorMessage);
+    });
+};
+
+// Add save handler for updating courses
+const saveCourse = (updatedCourse) => {
+  CourseServices.update(updatedCourse.course_number, updatedCourse)
+    .then(() => {
+      editDialog.value = false;
+      loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
+    })
+    .catch((error) => {
+      console.error("Error updating course:", error);
     });
 };
 
@@ -200,5 +216,6 @@ watch([courseName, department], () => {
       :course="courseToDelete"
       @confirm="confirmDelete"
     />
+    <UpdateCourse v-model="editDialog" :course="editedCourse" @save="saveCourse" />
   </v-container>
 </template>
