@@ -171,7 +171,6 @@ watch([courseName, department], () => {
 </script>
 
 <template>
-  <v-container>
     <v-card>
       <v-card-title class="d-flex align-center ga-3">
         <v-img
@@ -248,5 +247,5 @@ watch([courseName, department], () => {
 
     <!-- Add Course Dialog -->
     <AddCourse v-model="addDialog" @save="saveNewCourse" />
-  </v-container>
+
 </template>
