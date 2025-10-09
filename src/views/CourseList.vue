@@ -4,12 +4,15 @@ import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import avocadoImg from "../assets/avocado.png";
 import CourseDetails from "../components/courseDetails.vue";
+import UpdateCourse from "../components/updateCourse.vue";
 
 const router = useRouter();
 
 // Modal state
 const dialog = ref(false);
+const editDialog = ref(false);
 const selectedCourse = ref(null);
+const editedCourse = ref(null);
 
 // state
 const itemsPerPage = ref(10);
@@ -33,7 +36,8 @@ const search = ref("");
 
 // actions
 const editCourse = (course) => {
-  router.push({ name: "editCourse", params: { id: course.course_number } });
+  editedCourse.value = course;
+  editDialog.value = true;
 };
 
 const viewCourse = (course) => {
@@ -45,6 +49,18 @@ const deleteCourse = (course) => {
   CourseServices.delete(course.course_number).then(() => {
     loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
   });
+};
+
+// Add save handler for updating courses
+const saveCourse = (updatedCourse) => {
+  CourseServices.update(updatedCourse.course_number, updatedCourse)
+    .then(() => {
+      editDialog.value = false;
+      loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
+    })
+    .catch((error) => {
+      console.error("Error updating course:", error);
+    });
 };
 
 // backend fetch simulation
@@ -166,5 +182,6 @@ watch([courseName, department], () => {
 
     <!-- Course Details Modal -->
     <CourseDetails v-model="dialog" :course="selectedCourse" />
+    <UpdateCourse v-model="editDialog" :course="editedCourse" @save="saveCourse" />
   </v-container>
 </template>
