@@ -52,6 +52,18 @@ const deleteCourse = (course) => {
   });
 };
 
+// Add save handler for updating courses
+const saveCourse = (updatedCourse) => {
+  CourseServices.update(updatedCourse.course_number, updatedCourse)
+    .then(() => {
+      editDialog.value = false;
+      loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
+    })
+    .catch((error) => {
+      console.error("Error updating course:", error);
+    });
+};
+
 // backend fetch simulation
 const loadItems = ({ page, itemsPerPage, sortBy }) => {
   loading.value = true;
@@ -181,6 +193,6 @@ watch([courseNumber, department, level], () => {
 
     <!-- Course Details Modal -->
     <CourseDetails v-model="dialog" :course="selectedCourse" />
-    <UpdateCourse v-model="editDialog" :course="editedCourse" />
+    <UpdateCourse v-model="editDialog" :course="editedCourse" @save="saveCourse" />
   </v-container>
 </template>
