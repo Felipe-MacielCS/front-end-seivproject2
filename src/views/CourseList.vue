@@ -4,14 +4,16 @@ import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import avocadoImg from "../assets/avocado.png";
 import CourseDetails from "../components/courseDetails.vue";
-import DeleteDialog from "../components/courseDelete.vue"; // Import the delete dialog
+import DeleteDialog from "../components/courseDelete.vue";
 import UpdateCourse from "../components/updateCourse.vue";
+import AddCourse from "../components/addCourse.vue";
 
 const router = useRouter();
 
 // Modal state
 const dialog = ref(false);
 const editDialog = ref(false);
+const addDialog = ref(false);
 const selectedCourse = ref(null);
 const editedCourse = ref(null);
 
@@ -50,6 +52,10 @@ const viewCourse = (course) => {
   dialog.value = true;
 };
 
+const addedCourse = () => {
+  addDialog.value = true;
+};
+
 const deleteCourse = (item) => {
   const course = item.raw || item;
   courseToDelete.value = course;
@@ -74,6 +80,25 @@ const confirmDelete = () => {
         || error.message
         || "Failed to delete course. Please try again.";
 
+      alert(errorMessage);
+    });
+};
+
+// Add save handler for new courses
+const saveNewCourse = (newCourse) => {
+
+  CourseServices.create(newCourse)
+
+    .then(() => {
+      addDialog.value = false;
+      loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
+    })
+    .catch((error) => {
+      console.error("Error creating course:", error);
+      const errorMessage = error.response?.data?.message
+        || error.response?.data?.error
+        || error.message
+        || "Failed to create course. Please try again.";
       alert(errorMessage);
     });
 };
@@ -157,6 +182,9 @@ watch([courseName, department], () => {
           cover
         />
         <span class="text-h6">Courses</span>
+        <v-btn icon @click="addedCourse">
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
       </v-card-title>
 
       <v-data-table-server
@@ -217,5 +245,8 @@ watch([courseName, department], () => {
       @confirm="confirmDelete"
     />
     <UpdateCourse v-model="editDialog" :course="editedCourse" @save="saveCourse" />
+
+    <!-- Add Course Dialog -->
+    <AddCourse v-model="addDialog" @save="saveNewCourse" />
   </v-container>
 </template>
