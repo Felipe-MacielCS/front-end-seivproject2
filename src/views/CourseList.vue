@@ -101,7 +101,6 @@ watch([courseNumber, department, level], () => {
 </script>
 
 <template>
-  <v-container>
     <v-card>
       <v-card-title class="d-flex align-center ga-3">
         <v-img
@@ -168,5 +167,4 @@ watch([courseNumber, department, level], () => {
         </template>
       </v-data-table-server>
     </v-card>
-  </v-container>
 </template>
