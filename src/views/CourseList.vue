@@ -3,8 +3,23 @@ import CourseServices from "../services/courseService";
 import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import avocadoImg from "../assets/avocado.png";
+import CourseDetails from "../components/courseDetails.vue";
+import DeleteDialog from "../components/courseDelete.vue";
+import UpdateCourse from "../components/updateCourse.vue";
+import AddCourse from "../components/addCourse.vue";
 
 const router = useRouter();
+
+// Modal state
+const dialog = ref(false);
+const editDialog = ref(false);
+const addDialog = ref(false);
+const selectedCourse = ref(null);
+const editedCourse = ref(null);
+
+// Delete dialog state
+const deleteDialog = ref(false);
+const courseToDelete = ref(null);
 
 // state
 const itemsPerPage = ref(10);
@@ -22,24 +37,82 @@ const loading = ref(true);
 const totalItems = ref(0);
 
 // search fields
-const courseNumber = ref("");
+const courseName = ref("");
 const department = ref("");
-const level = ref("");
 const search = ref("");
 
 // actions
 const editCourse = (course) => {
-  router.push({ name: "editCourse", params: { id: course.course_number } });
+  editedCourse.value = course;
+  editDialog.value = true;
 };
 
 const viewCourse = (course) => {
-  router.push({ name: "viewCourse", params: { id: course.course_number } });
+  selectedCourse.value = course;
+  dialog.value = true;
 };
 
-const deleteCourse = (course) => {
-  CourseServices.delete(course.course_number).then(() => {
-    loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
-  });
+const addedCourse = () => {
+  addDialog.value = true;
+};
+
+const deleteCourse = (item) => {
+  const course = item.raw || item;
+  courseToDelete.value = course;
+  deleteDialog.value = true;
+};
+
+const confirmDelete = () => {
+  if (!courseToDelete.value) return;
+
+  CourseServices.delete(courseToDelete.value.course_number)
+    .then(() => {
+      deleteDialog.value = false;
+      courseToDelete.value = null;
+      loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
+    })
+    .catch((error) => {
+      console.error("Error deleting course:", error);
+      console.error("Error response:", error.response?.data);
+
+      const errorMessage = error.response?.data?.message
+        || error.response?.data?.error
+        || error.message
+        || "Failed to delete course. Please try again.";
+
+      alert(errorMessage);
+    });
+};
+
+// Add save handler for new courses
+const saveNewCourse = (newCourse) => {
+
+  CourseServices.create(newCourse)
+
+    .then(() => {
+      addDialog.value = false;
+      loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
+    })
+    .catch((error) => {
+      console.error("Error creating course:", error);
+      const errorMessage = error.response?.data?.message
+        || error.response?.data?.error
+        || error.message
+        || "Failed to create course. Please try again.";
+      alert(errorMessage);
+    });
+};
+
+// Add save handler for updating courses
+const saveCourse = (updatedCourse) => {
+  CourseServices.update(updatedCourse.course_number, updatedCourse)
+    .then(() => {
+      editDialog.value = false;
+      loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
+    })
+    .catch((error) => {
+      console.error("Error updating course:", error);
+    });
 };
 
 // backend fetch simulation
@@ -49,20 +122,17 @@ const loadItems = ({ page, itemsPerPage, sortBy }) => {
     .then((response) => {
       let items = response.data;
 
-      // filter locally (you can push this logic to backend later)
-      if (courseNumber.value) {
+      // filter by course name
+      if (courseName.value) {
         items = items.filter((c) =>
-          c.course_number.toLowerCase().includes(courseNumber.value.toLowerCase())
+          c.course_name.toLowerCase().includes(courseName.value.toLowerCase())
         );
       }
+
+      // filter by department
       if (department.value) {
         items = items.filter((c) =>
           c.dept.toLowerCase().includes(department.value.toLowerCase())
-        );
-      }
-      if (level.value) {
-        items = items.filter((c) =>
-          c.level.toLowerCase().includes(level.value.toLowerCase())
         );
       }
 
@@ -95,7 +165,7 @@ onMounted(() => {
 });
 
 // refresh table when search inputs change
-watch([courseNumber, department, level], () => {
+watch([courseName, department], () => {
   search.value = String(Date.now());
 });
 </script>
@@ -111,6 +181,9 @@ watch([courseNumber, department, level], () => {
           cover
         />
         <span class="text-h6">Courses</span>
+        <v-btn icon @click="addedCourse">
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
       </v-card-title>
 
       <v-data-table-server
@@ -124,13 +197,13 @@ watch([courseNumber, department, level], () => {
         @update:options="loadItems"
       >
         <!-- table footer with search inputs -->
-        <template v-slot:tfoot>
+        <template v-slot:thead>
           <tr>
-            <td>
+            <td colspan="2">
               <v-text-field
-                v-model="courseNumber"
+                v-model="courseName"
                 density="compact"
-                placeholder="Search course #..."
+                placeholder="Search course name..."
                 hide-details
               />
             </td>
@@ -142,14 +215,7 @@ watch([courseNumber, department, level], () => {
                 hide-details
               />
             </td>
-            <td>
-              <v-text-field
-                v-model="level"
-                density="compact"
-                placeholder="Search level..."
-                hide-details
-              />
-            </td>
+            <td colspan="3"></td>
           </tr>
         </template>
 
@@ -167,4 +233,19 @@ watch([courseNumber, department, level], () => {
         </template>
       </v-data-table-server>
     </v-card>
+
+    <!-- Course Details Modal -->
+    <CourseDetails v-model="dialog" :course="selectedCourse" />
+
+    <!-- Delete Confirmation Dialog -->
+    <DeleteDialog
+      v-model="deleteDialog"
+      :course="courseToDelete"
+      @confirm="confirmDelete"
+    />
+    <UpdateCourse v-model="editDialog" :course="editedCourse" @save="saveCourse" />
+
+    <!-- Add Course Dialog -->
+    <AddCourse v-model="addDialog" @save="saveNewCourse" />
+
 </template>

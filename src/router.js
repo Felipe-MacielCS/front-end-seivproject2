@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import ViewCourse from "./views/ViewCourse.vue";
+// import ViewCourse from "./views/ViewCourse.vue";
 import CoursesList from "./views/CourseList.vue";
 ;
 
@@ -12,12 +12,12 @@ const router = createRouter({
       name: "courses",
       component: CoursesList,
     },
-    {
-      path: "/view/:id",
-      name: "view",
-      component: ViewCourse,
-      props: true,
-    },
+    // {
+    //   path: "/view/:id",
+    //   name: "view",
+    //   component: ViewCourse,
+    //   props: true,
+    // },
   ],
 });
 
